@@ -13,7 +13,7 @@ const PetSchema = new Schema({
     picUrl: { type: String },
     picUrlSq: { type: String },
     favoriteFood: { type: String },
-  , description: { type: String }
+    description: { type: String }
 },
 {
   timestamps: true
