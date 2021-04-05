@@ -7,9 +7,6 @@ const petsController = require('../controllers/pets')
 // MAILER
 const mailer = require('../utils/mailer');
 
-// SEARCH PET
-router.get('/search', petsController.searchPets);
-
 // NEW PET
 router.get('/new', petsController.getNewPetForm);
 
