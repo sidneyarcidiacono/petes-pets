@@ -1,51 +1,61 @@
 // MODEL
 const Pet = require('../models/pet');
 
+// Validation
+const { validationResult } = require('express-validator')
+
 // NEW PET
 exports.getNewPetForm = (req, res) => {
   res.render('pets-new');
 }
 
 // CREATE PET
-exports.addNewPet = (req, res) => {
-  const pet = new Pet(req.body);
-
-  pet.save()
-    .then((pet) => {
-      res.redirect(`/pets/${pet._id}`);
-    })
-    .catch((err) => {
-      // Handle Errors
-      console.log(err.message)
-      throw new Error("Unable to add pet.")
-    }) ;
+exports.addNewPet = async (req, res) => {
+  const errors = validationResult(req)
+   if (!errors.isEmpty()) {
+     const error = errors.array()[0].param.replace(/([A-Z])/g, ' $1')
+     const formattedError = encodeURIComponent(
+       error.charAt(0).toUpperCase() + error.slice(1)
+     )
+     res.status(422).redirect(`/pets/new?error=${formattedError}`)
+   }
+  try {
+    const pet = new Pet(req.body);
+    await pet.save()
+    res.redirect(`/pets/${pet._id}`);
+  } catch (err) {
+    res.status(400).send(err.message)
+  }
 }
 
 // SHOW PET BY ID
-exports.getPetDetails = (req, res) => {
-  Pet.findById(req.params.id).exec((err, pet) => {
+exports.getPetDetails = async (req, res) => {
+  try {
+    const pet = await Pet.findById(req.params.id)
     res.render('pets-show', { pet: pet });
-  });
+  } catch (err) {
+    res.status(404).send(err.message)
+  }
 }
 
 // SHOW PET EDIT FORM
-exports.getEditPetForm = (req, res) => {
-  Pet.findById(req.params.id).exec((err, pet) => {
+exports.getEditPetForm = async (req, res) => {
+  try {
+    const pet = await Pet.findById(req.params.id)
     res.render('pets-edit', { pet: pet });
-  });
+  } catch (err) {
+    res.status(500).send(err.message)
+  }
 }
 
 // EDIT PET
-exports.editPet = (req, res) => {
-  Pet.findByIdAndUpdate(req.params.id, req.body)
-    .then((pet) => {
-      res.redirect(`/pets/${pet._id}`)
-    })
-    .catch((err) => {
-      // Handle Errors
-      console.log(err.message)
-      throw new Error("Something went wrong while editing this pet.")
-    });
+exports.editPet = async (req, res) => {
+  try {
+    const pet = await Pet.findByIdAndUpdate(req.params.id, req.body)
+    res.redirect(`/pets/${pet._id}`)
+  } catch (err) {
+    res.status(500).send(err.message)
+  }
 }
 
 // PURCHASE
@@ -54,7 +64,7 @@ exports.purchasePet = (req, res) => {
   console.log(req.body);
   // Set your secret key: remember to change this to your live secret key in production
   // See your keys here: https://dashboard.stripe.com/account/apikeys
-  var stripe = require("stripe")(process.env.PRIVATE_STRIPE_API_KEY);
+  const stripe = require("stripe")(process.env.PRIVATE_STRIPE_API_KEY);
 
   // Token is created using Checkout or Elements!
   // Get the payment token ID submitted by the form:
