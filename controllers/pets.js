@@ -101,8 +101,11 @@ exports.purchasePet = (req, res) => {
 }
 
 // DELETE PET
-exports.deletePet = (req, res) => {
-  Pet.findByIdAndRemove(req.params.id).exec((err, pet) => {
+exports.deletePet = async (req, res) => {
+  try {
+    const pet = await Pet.findByIdAndRemove(req.params.id)
     return res.redirect('/')
-  });
+  } catch (err) {
+    res.status(500).send(err.message)
+  }
 }

@@ -8,25 +8,25 @@ block content
             form(action=`/pets/${pet._id}?_method=PUT`, method="POST")
                 .form-group
                     label Name
-                    input.form-control(name="name" value=pet.name)
+                    input.form-control(name="name" value=pet.name required maxlength="25")
                 .form-group
                     label Birthday
-                    input.form-control(name="birthday" value=pet.birthday)   
+                    input.form-control(name="birthday" value=pet.birthday required type="date")   
                 .form-group
                     label Species
-                    input.form-control(name="species" value=pet.species)    
+                    input.form-control(name="species" value=pet.species required maxlength="25")    
                 .form-group
                     label Rectangular Image URL
-                    input.form-control(name="picUrl" value=pet.picUrl) 
+                    input.form-control(name="picUrl" value=pet.picUrl required type="url" maxlength="50") 
                 .form-group
                     label Square Image URL
-                    input.form-control(name="picUrlSq" value=pet.picUrlSq) 
+                    input.form-control(name="picUrlSq" value=pet.picUrlSq required type="url" maxlength="50") 
                 .form-group
                     label Favorite Food
-                    input.form-control(name="favoriteFood" value=pet.favoriteFood)    
+                    input.form-control(name="favoriteFood" value=pet.favoriteFood required maxlength="25")    
                 .form-group
                     label Description
-                    textarea.form-control(name="description")= pet.description
+                    textarea.form-control(name="description" required maxlength="250")= pet.description
                 button(type="submit").btn.btn-primary Save
             .text-right
                 form(action=`/pets/${pet._id}?_method=DELETE`, method="POST")

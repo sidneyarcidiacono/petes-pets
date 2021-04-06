@@ -4,27 +4,29 @@ block content
     
   .row.justify-content-center
     .col-sm-6
+      if error
+          .alert.alert-danger(role="alert") #{error} is invalid.
       legend New Pet
       form(action="/pets", method="post")
         .form-group
             label Name
-            input.form-control(name="name")
+            input.form-control(name="name" required maxlength="25")
         .form-group
             label Birthday
-            input.form-control(name="birthday")
+            input.form-control(name="birthday" required type="date")
         .form-group
             label Species
-            input.form-control(name="species")
+            input.form-control(name="species" required maxlength="25")
         .form-group
             label Rectangular Image URL
-            input.form-control(name="picUrl") 
+            input.form-control(name="picUrl" required type="url" maxlength="50") 
         .form-group
             label Square Image URL
-            input.form-control(name="picUrlSq")   
+            input.form-control(name="picUrlSq" required type="url" maxlength="50")   
         .form-group
             label Favorite Food
-            input.form-control(name="favoriteFood") 
+            input.form-control(name="favoriteFood" required maxlength="25") 
         .form-group
             label Description
-            textarea.form-control(name="description")   
+            textarea.form-control(name="description" required maxlength="250")   
         button(type="submit").btn.btn-primary Save
