@@ -59,8 +59,7 @@ exports.editPet = async (req, res) => {
 }
 
 // PURCHASE
-// TODO: test this when we have FE ability to purchase pets
-exports.purchasePet = (req, res) => {
+exports.purchasePet = async (req, res) => {
   console.log(req.body);
   // Set your secret key: remember to change this to your live secret key in production
   // See your keys here: https://dashboard.stripe.com/account/apikeys
@@ -74,30 +73,27 @@ exports.purchasePet = (req, res) => {
   // this way we'll insure we use a non-null value
   let petId = req.body.petId || req.params.id;
 
-  Pet.findById(petId).exec((err, pet) => {
-    if(err) {
-      console.log('Error: ' + err);
-      res.redirect(`/pets/${req.params.id}`);
-    }
-    const charge = stripe.charges.create({
+  try {
+    const pet = await Pet.findById(petId)
+    const charge = await stripe.charges.create({
       amount: pet.price * 100,
       currency: 'usd',
       description: `Purchased ${pet.name}, ${pet.species}`,
       source: token,
-    }).then((chg) => {
-    // Convert the amount back to dollars for ease in displaying in the template
-      const user = {
-        email: req.body.stripeEmail,
-        amount: chg.amount / 100,
-        petName: pet.name
-      };
-      // Call our mail handler to manage sending emails
-      mailer.sendMail(user, req, res);
     })
-    .catch(err => {
-      console.log('Error: ' + err);
-    });
-  })
+    // Convert the amount back to dollars for ease in displaying in the template
+    const user = {
+      email: req.body.stripeEmail,
+      amount: charge.amount / 100,
+      petName: pet.name
+    };
+    // Call our mail handler to manage sending emails
+    mailer.sendMail(user, req, res);
+    res.redirect(`/pets/${req.params.id}`)
+  } catch (err) {
+    console.log('Error: ' + err);
+    res.redirect(`/pets/${req.params.id}`);
+  }
 }
 
 // DELETE PET

@@ -13,7 +13,8 @@ const PetSchema = new Schema({
     picUrl: { type: String, required: true, maxLength: 50 },
     picUrlSq: { type: String, required: true, maxLength: 50 },
     favoriteFood: { type: String, required: true, maxLength: 25 },
-    description: { type: String, required: true, maxLength: 250 }
+    description: { type: String, required: true, maxLength: 250 },
+    price: { type: Number, required: true }
 },
 {
   timestamps: true
