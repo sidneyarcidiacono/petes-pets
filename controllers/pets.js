@@ -4,6 +4,32 @@ const Pet = require('../models/pet');
 // Validation
 const { validationResult } = require('express-validator')
 
+// UPLOAD TO AMAZON S3
+const Upload = require('s3-uploader');
+
+const client = new Upload(process.env.S3_BUCKET, {
+  aws: {
+    path: 'pets/avatar',
+    region: process.env.S3_REGION,
+    acl: 'public-read',
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  },
+  cleanup: {
+    versions: true,
+    original: true
+  },
+  versions: [{
+    maxWidth: 400,
+    aspect: '16:10',
+    suffix: '-standard'
+  },{
+    maxWidth: 300,
+    aspect: '1:1',
+    suffix: '-square'
+  }]
+});
+
 // NEW PET
 exports.getNewPetForm = (req, res) => {
   res.render('pets-new');
@@ -11,8 +37,10 @@ exports.getNewPetForm = (req, res) => {
 
 // CREATE PET
 exports.addNewPet = async (req, res) => {
+  console.log("IN CONTROLLER LINE 40")
   const errors = validationResult(req)
    if (!errors.isEmpty()) {
+     console.log("IN VAL ERRORS THING")
      const error = errors.array()[0].param.replace(/([A-Z])/g, ' $1')
      const formattedError = encodeURIComponent(
        error.charAt(0).toUpperCase() + error.slice(1)
@@ -21,9 +49,28 @@ exports.addNewPet = async (req, res) => {
    }
   try {
     const pet = new Pet(req.body);
+    console.log(`pet line 53: ${pet}`)
     await pet.save()
-    res.redirect(`/pets/${pet._id}`);
+    console.log(`PET: ${pet}`)
+    if (req.file) {
+      // Upload the images
+      const versions = await client.upload(req.file.path, {})
+      console.log(`VERSIONS: ${versions}`)
+      // Pop off the -square and -standard and just use the one URL to grab the image
+      versions.forEach(async function (image) {
+        const urlArray = image.url.split('-');
+        urlArray.pop();
+        const url = urlArray.join('-');
+        pet.avatarUrl = url;
+        console.log(`pet.avatarUrl: ${pet.avatarUrl}`)
+        await pet.save()
+      });
+      res.redirect(`/pets/${pet.id}`)
+    } else {
+      res.redirect(`/pets/${pet.id}`)
+    }
   } catch (err) {
+    console.log("IN CATCH BLOCK ")
     res.status(400).send(err.message)
   }
 }
