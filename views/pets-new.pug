@@ -7,7 +7,7 @@ block content
       if error
           .alert.alert-danger(role="alert") #{error} is invalid.
       legend New Pet
-      form(action="/pets", method="post", enctype="multipart/form-data")
+      form(action="#", id="new-pet")
         .form-group
             label Name
             input.form-control(name="name" required maxlength="25")
